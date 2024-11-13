@@ -4,10 +4,19 @@ import exceptions as exc
 
 class Stage(object):
 
+    __inst = None
+
+    @classmethod
+    def inst(cls):
+        return cls.__inst
+
     def __init__(self, window_size=(1024,768)):
         self.__window_size = window_size
         self.__background = ( 0, 0, 0 )
         self.__window = None
+        self.__contents = []
+        self.__time = None
+        Stage.__inst = self
 
     @property
     def window_size(self):
@@ -31,13 +40,21 @@ class Stage(object):
         pygame.display.update()
 
     def update(self):
-        pass
+        t = pygame.time.get_ticks() / 1000.0
+        delta_t = t - self.__time
+        self.__time = t
+        for x in self.__contents:
+            x.move(delta_t)
 
     def draw(self):
-        pass
+        for x in self.__contents:
+            x.draw(self.__window)
 
     def setup(self):
         pass
+
+    def add_thing(self, x):
+        self.__contents.append(x)
 
     def dispatch(self):
         events = pygame.event.get()
@@ -52,7 +69,7 @@ class Stage(object):
 
         try:
             self.__window = pygame.display.set_mode(self.window_size)
-
+            self.__time = pygame.time.get_ticks() / 10000.0
             try:
                 while True:
                     # 1. Events exception
@@ -60,8 +77,8 @@ class Stage(object):
 
                     # 2. update
                     self.update()
-                    # 3. clear
 
+                    # 3. clear
                     self.clear()
 
                     # 4. render
