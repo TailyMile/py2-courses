@@ -36,6 +36,30 @@ class MyHandler(BaseHTTPRequestHandler):
         self.send_error(404, 'Page not found')
         self.end_headers()
 
+    def do_POST(self):
+        for regexp, function in _post_dispatch:
+            M = regexp.match(self.path)
+            if not M:
+                continue
+            params = M.groups()
+            function(self, *params)
+            return
+        self.send_error(404, 'Page not found')
+        self.end_headers()
+
+    @post(r'/message_to/(\d+)/?')
+    def recv_message(self, client):
+        size = int(self.headers['Content-length'])
+        message = self.rfile.read(size).decode('utf-8')
+        self.server.message_to(client, message)
+        self.send_response(200, 'OK')
+        self.send_header('Content-type', 'text/plain; charset=utf-8')
+        self.end_headers()
+        response_body = 'OK'
+        resp_data = response_body.encode('utf-8')
+        self.wfile.write(resp_data)
+        
+
     @get(r'/test/?')
     def test_request(self):
         self.send_response(200, 'OK')

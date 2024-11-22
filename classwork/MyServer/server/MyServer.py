@@ -7,11 +7,6 @@ class MyServer(HTTPServer):
         super().__init__(*args, **kwargs)
         self.__messages = dict()
         
-        # временно
-        self.message_to('234', 'Привет, Вася')
-        self.message_to('234', 'Как поживаешь?')
-        self.message_to('46', 'Спасибо, хорошо')
-        
     def message_to(self, client, message):
         if client in self.__messages:
             self.__messages[client].append(message)
